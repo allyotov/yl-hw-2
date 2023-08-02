@@ -3,24 +3,15 @@ from datetime import datetime, timedelta
 from typing import Generator, List, Tuple
 
 
-class DatesGenerator:
-    def __init__(self, date_ranges) -> Generator:
-        self.start_date, self.end_date = date_ranges.pop(0)
-        self.ranges = date_ranges
-        self.current_date = self.start_date
-
-    def __iter__(self):
-        while True:
-            try:
-                yield self.current_date
-                self.current_date += timedelta(days=1)
-                if self.current_date > self.end_date:
-                    if not self.ranges:
-                        raise StopIteration
-                    self.current_date, self.end_date = self.ranges.pop(0)
-            except StopIteration:
-                break
-
+def get_days(date_ranges):
+    current_date, end_date = date_ranges.pop(0)
+    while True:
+        yield current_date
+        current_date += timedelta(days=1)
+        if current_date > end_date:
+            if not date_ranges:
+                return
+            current_date, end_date = date_ranges.pop(0)
 
 
 @dataclass
@@ -29,7 +20,7 @@ class Movie:
     dates: List[Tuple[datetime, datetime]]
 
     def schedule(self) -> Generator[datetime, None, None]:
-        return DatesGenerator(self.dates)
+        return get_days(self.dates)
 
 
 if __name__ == '__main__':
